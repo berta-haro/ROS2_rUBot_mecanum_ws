@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,10 +8,11 @@
   <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"></script>
   <style>
-    :root {
+    :root{
       --gap: 20px;
-      --page-bg: #414141;
+      --card-bg: #fff;
       --card-bd: #ccc;
+      --page-bg: #414141;
     }
 
     body {
@@ -22,29 +24,29 @@
     }
 
     .connection-form {
+      width: 100%;
+      margin-bottom: var(--gap);
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      margin-bottom: var(--gap);
     }
-
-    .connection-form input[type="number"] {
+    .connection-form label { color: #fff; }
+    .connection-form input[type="number"]{
       width: 70px;
       padding: 6px 8px;
       border-radius: 6px;
       border: 1px solid #bbb;
       background: #fff;
     }
-
-    .connection-form button {
+    .connection-form button{
       padding: 8px 14px;
       border-radius: 6px;
       border: 1px solid #bbb;
       background: #f5f5f5;
       cursor: pointer;
     }
-
+    .connection-form button:hover { filter: brightness(0.97); }
     .connection-form button.connected {
       background: #2ecc71;
       border-color: #2ecc71;
@@ -57,23 +59,17 @@
       grid-template-areas:
         "camera right"
         "map    pos";
-      gap: var(--gap);
+      align-items: center;
       justify-items: center;
-      align-items: flex-start;
+      gap: var(--gap);
     }
 
-    #camera-feed {
-      grid-area: camera;
-      width: 360px;
-      height: 270px;
-      background-color: #000;
-      border-radius: 5px;
-      border: 1px solid var(--card-bd);
-      object-fit: cover;
-    }
+    #camera-feed      { grid-area: camera; }
+    .right-panel      { grid-area: right; }
+    .map-display      { grid-area: map; }
+    .position-display { grid-area: pos; }
 
     .right-panel {
-      grid-area: right;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -83,8 +79,28 @@
     .joy-legend {
       font-size: 1rem;
       font-weight: 700;
-      margin: 0;
+      color: #eee;
+      text-align: center;
+      margin-top: 0;
     }
+
+    .omega-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #eee;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+
+    .joy-vel {
+      font-size: 0.9rem;
+      color: #ddd;
+      text-align: center;
+    }
+
+    .map-display { width: min(280px, 100%); }
 
     .joystick-container {
       width: 200px;
@@ -96,66 +112,23 @@
       touch-action: none;
     }
 
-    .joy-vel {
-      font-size: 0.9rem;
-      color: #ddd;
-      text-align: center;
-    }
-
-    .omega-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.95rem;
-      width: 100%;
-      margin-top: 4px;
-    }
-
-    #omegaSlider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 160px;
-      height: 10px;
-      border-radius: 6px;
-      background: #666;
-      outline: none;
-    }
-
-    #omegaSlider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #f5f5f5;
-      border: 2px solid #222;
-      cursor: pointer;
-    }
-
-    #omegaSlider::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #f5f5f5;
-      border: 2px solid #222;
-      cursor: pointer;
-    }
-
-    .map-display {
-      grid-area: map;
-      width: min(280px, 100%);
+    .image-view {
+      width: 360px;
+      height: 270px;
+      background-color: #000;
+      border-radius: 5px;
+      border: 1px solid var(--card-bd);
+      object-fit: cover;
+      display: block;
     }
 
     .map-image {
       width: 100%;
-      border-radius: 5px;
+      height: auto;
       border: 1px solid var(--card-bd);
-      background-color: #e6e6e6;
+      border-radius: 5px;
       display: block;
-    }
-
-    .position-display {
-      grid-area: pos;
+      background-color: #e6e6e6;
     }
 
     @media (max-width: 900px) {
@@ -166,18 +139,24 @@
           "right"
           "map"
           "pos";
-      }
-
-      #camera-feed,
-      .map-display,
-      .position-display {
-        width: 100%;
-        max-width: 520px;
+        justify-items: center;
       }
 
       .joystick-container {
         width: 160px;
         height: 160px;
+      }
+
+      .image-view {
+        width: 100%;
+        max-width: 520px;
+        height: auto;
+      }
+
+      .position-display,
+      .map-display {
+        width: 100%;
+        max-width: 520px;
       }
     }
   </style>
@@ -186,124 +165,257 @@
 <body>
   <div class="connection-form">
     <label for="robotNumber">Robot:</label>
-    <input id="robotNumber" type="number" min="1" max="9" value="1" />
+    <input id="robotNumber" type="number" min="1" max="9" value="1" title="Robot number"/>
     <button id="connectBtn" onclick="connectToROS()">Connect</button>
   </div>
 
   <div class="dashboard">
     <!-- Camera -->
-    <img id="camera-feed" alt="Camera Feed" />
+    <img class="image-view" id="camera-feed" alt="Camera Feed" />
 
     <!-- Right panel -->
     <aside class="right-panel">
       <div class="joy-legend">Joystick</div>
+
       <div class="joystick-container" id="joystick_h"></div>
+
+      <div class="omega-wrap">
+        <label for="omegaSlider">ω𝓏:</label>
+        <input id="omegaSlider" type="range" min="-1" max="1" step="0.01" value="0" />
+        <span id="omegaVal">0.00</span> rad/s
+      </div>
 
       <div class="joy-vel">
         vₓ: <span id="vx">0.00</span> m/s · vᵧ: <span id="vy">0.00</span> m/s
       </div>
-
-      <div class="omega-wrap">
-        <label for="omegaSlider">ω:</label>
-        <input id="omegaSlider" type="range" min="-1" max="1" step="0.01" value="0" />
-        <span id="omegaVal">0.00</span> rad/s
-      </div>
     </aside>
 
-    <!-- Map -->
+    <!-- Map + LiDAR -->
     <div class="map-display">
       <h3>Map + LiDAR</h3>
-      <canvas id="map-canvas" class="map-image"></canvas>
+      <canvas id="map-canvas" class="map-image" width="200" height="200"></canvas>
     </div>
 
     <!-- Pose -->
     <div class="position-display">
-      <h3>Pose</h3>
+      <h3>Position & Orientation</h3>
       <p>X (m): <span id="position-x">0</span></p>
       <p>Y (m): <span id="position-y">0</span></p>
-      <p>θ (°): <span id="rotation-z">0</span></p>
+      <p>&Theta; (º): <span id="rotation-z">0</span></p>
     </div>
   </div>
 
   <script>
-    // ===== Config =====
-    const MAP_RESOLUTION = 0.01;      // m per píxel en el canvas
-    const ROBOT_LEN_M    = 0.30;      // 30 cm (X)
-    const ROBOT_WID_M    = 0.20;      // 20 cm (Y)
-    const SPEED_VECTOR_GAIN = 0.5;    // escalar longitud fletxa velocitat
-    const maxSpeed = 0.3;             // m/s
-    const maxTurn  = 0.4;             // rad/s
-    const distanceFactor = 75;        // radi efectiu joystick
-
-    // ===== Estat =====
     let ros;
     let cmdVelTopic;
 
+    // ===== Config =====
+    const MAP_RESOLUTION = 0.01;      // m/px
+    const ROBOT_RADIUS   = 5;         // px
+    const SPEED_VECTOR_SCALE = 100;   // px per (m/s)
+
+    const maxSpeed = 0.3;             // m/s
+    const maxTurn  = 0.4;             // rad/s
+    const distanceFactor = 75;        // joystick
+
+    // ===== State =====
     let currentLinearX = 0;
     let currentLinearY = 0;
     let currentAngularZ = 0;
 
+    let mapImage = new Image();
     let latestScan = null;
 
-    // Frame de display:
-    // - Origen = primer /odom
-    // - +X = forward inicial
-    // - +Y = right inicial (per això invertim Y del robot, que és left+)
-    let originSet = false;
-    let originX = 0;
-    let originY = 0;
-    let yaw0Set = false;
-    let yaw0 = 0;
-
-    let lastRobotX = 0;    // en frame display
+    // Robot pose (relativa al primer odom)
+    let lastRobotX = 0;
     let lastRobotY = 0;
-    let lastRobotYaw = 0;  // yaw relatiu en frame display
+    let lastRobotYaw = 0;
 
-    // ===== Utils =====
+    // Centering
+    let odomCenterSet = false;
+    let odomCenterX = 0;
+    let odomCenterY = 0;
+
     function getRosbridgeAddress() {
       const currentUrl = window.location.href;
       const rosbridgeUrl = currentUrl.replace(/\/webpage\/?$/, '/rosbridge/');
-      return rosbridgeUrl.replace(/^http/, 'ws').replace(/^https/, 'wss');
+      const rosbridgeAddress = rosbridgeUrl.replace(/^http/, 'ws').replace(/^https/, 'wss');
+      return rosbridgeAddress;
     }
 
-    function quaternionToYaw(o) {
-      const siny_cosp = 2 * (o.w * o.z + o.x * o.y);
-      const cosy_cosp = 1 - 2 * (o.y * o.y + o.z * o.z);
+    function connectToROS() {
+      if (ros && ros.isConnected) {
+        console.log('Ja estàs connectat.');
+        return;
+      }
+
+      document.getElementById('connectBtn')?.setAttribute('disabled', 'disabled');
+      const robotNum = parseInt(document.getElementById('robotNumber').value) || 1;
+
+      const mapName = "map";
+      const mapPath = `maps/${mapName}.png`;
+
+      const host = window.location.hostname;
+      const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+
+      let rosbridgeAddress;
+      if (host.startsWith("192.168.1.")) {
+        const lastOctet = robotNum * 10 + 4;
+        const robotHost = `192.168.1.${lastOctet}`;
+        rosbridgeAddress = `${scheme}://${robotHost}:9090`;
+      } else {
+        rosbridgeAddress = getRosbridgeAddress();
+      }
+      console.log("Connecting to:", rosbridgeAddress);
+
+      resizeMapCanvas();
+      mapImage.onload = () => {
+        resizeMapCanvas();
+        console.log('Map image loaded & canvas resized.');
+      };
+      mapImage.src = mapPath;
+
+      ros = new ROSLIB.Ros({ url: rosbridgeAddress });
+
+      const connectBtn = document.getElementById('connectBtn');
+      ros.on('connection', function () {
+        console.log('Connected to rosbridge:', rosbridgeAddress);
+        if (connectBtn) connectBtn.classList.add('connected');
+        setupTopics();
+        setupControls();
+        document.getElementById('connectBtn')?.removeAttribute('disabled');
+        ros.isConnected = true;
+      });
+
+      ros.on('error', function (error) {
+        console.error('Connection Error:', error);
+        if (connectBtn) connectBtn.classList.remove('connected');
+        document.getElementById('connectBtn')?.removeAttribute('disabled');
+        ros.isConnected = false;
+      });
+
+      ros.on('close', function () {
+        console.log('Connection closed.');
+        if (connectBtn) connectBtn.classList.remove('connected');
+        document.getElementById('connectBtn')?.removeAttribute('disabled');
+        ros.isConnected = false;
+      });
+    }
+
+    function quaternionToYaw(orientation) {
+      const q = orientation;
+      const siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+      const cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
       return Math.atan2(siny_cosp, cosy_cosp);
+    }
+
+    function setupTopics() {
+      // cmd_vel
+      cmdVelTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/cmd_vel',
+        messageType: 'geometry_msgs/msg/Twist'
+      });
+
+      // Camera
+      const imageTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/image_raw/compressed',
+        messageType: 'sensor_msgs/msg/CompressedImage'
+      });
+      imageTopic.subscribe(function (message) {
+        document.getElementById('camera-feed').src =
+          "data:image/jpeg;base64," + message.data;
+      });
+
+      // Odometry
+      const odomTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/odom',
+        messageType: 'nav_msgs/msg/Odometry'
+      });
+      odomTopic.subscribe(function (message) {
+        const position = message.pose.pose.position;
+        const orientation = message.pose.pose.orientation;
+        const twist = message.twist.twist;
+
+        // Centrem automàticament al primer odom:
+        if (!odomCenterSet) {
+          odomCenterX = position.x;
+          odomCenterY = position.y;
+          odomCenterSet = true;
+        }
+
+        // Coordenades relatives: origen = primera posició
+        lastRobotX = position.x - odomCenterX; // X forward (m)
+        lastRobotY = position.y - odomCenterY; // Y (m)
+        lastRobotYaw = quaternionToYaw(orientation);
+
+        // Mostra numèrica (en aquest frame centrat)
+        document.getElementById('position-x').textContent = lastRobotX.toFixed(2);
+        document.getElementById('position-y').textContent = lastRobotY.toFixed(2);
+        document.getElementById('rotation-z').textContent =
+          (lastRobotYaw * 180 / Math.PI).toFixed(1);
+
+        // Velocitat global per a la fletxa (coherent amb yaw)
+        const velX_robot = twist.linear.x;
+        const velY_robot = twist.linear.y;
+        const velX_global =
+          velX_robot * Math.cos(lastRobotYaw) - velY_robot * Math.sin(lastRobotYaw);
+        const velY_global =
+          velX_robot * Math.sin(lastRobotYaw) + velY_robot * Math.cos(lastRobotYaw);
+
+        drawRobotState(lastRobotX, lastRobotY,
+                       velX_global, velY_global,
+                       lastRobotYaw, latestScan);
+      });
+
+      // LiDAR /scan
+      const scanTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/scan',
+        messageType: 'sensor_msgs/msg/LaserScan'
+      });
+      scanTopic.subscribe(function (message) {
+        latestScan = message; // Es farà servir al següent update d'odom
+      });
     }
 
     function resizeMapCanvas() {
       const canvas = document.getElementById('map-canvas');
       if (!canvas) return;
+
       const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width || 260;
-      const height = rect.width || 260; // quadrat
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      const cssW = canvas.clientWidth || canvas.width;
+      const cssH = canvas.clientHeight || canvas.height;
+
+      canvas.width  = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+
       const ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    // Frame display: +X amunt, +Y dreta
+    // Converteix coords del món (X forward, Y dreta) a píxels
     function worldToPixel(x, y, W, H) {
-      // x: m (amunt), y: m (dreta)
+      // x: forward (m), +x amunt
+      // y: dreta (m), +y dreta
       const px = W / 2 + (y / MAP_RESOLUTION);
       const py = H / 2 - (x / MAP_RESOLUTION);
       return [px, py];
     }
 
+    // Dibuixa eixos al centre, amb ticks cada 0.40 m
     function drawAxes(ctx, W, H) {
       const cx = W / 2;
       const cy = H / 2;
-      const metersPerTick = 0.30;
+      const metersPerTick = 0.40;
       const pxPerMeter = 1.0 / MAP_RESOLUTION;
       const tickPx = metersPerTick * pxPerMeter;
       const tickLen = 5;
 
+      // Eix X (vermell) - vertical
       ctx.save();
-
-      // Eix X (vermell, vertical)
       ctx.strokeStyle = 'red';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -311,197 +423,72 @@
       ctx.lineTo(cx, H);
       ctx.stroke();
 
-      // Eix Y (verd, horitzontal)
+      // Tics sobre eix X
+      const maxXTicks = Math.floor((H / 2) / tickPx);
+      for (let i = 1; i <= maxXTicks; i++) {
+        // +X (amunt)
+        let yPos = cy - i * tickPx;
+        ctx.beginPath();
+        ctx.moveTo(cx - tickLen, yPos);
+        ctx.lineTo(cx + tickLen, yPos);
+        ctx.stroke();
+
+        // -X (avall)
+        yPos = cy + i * tickPx;
+        ctx.beginPath();
+        ctx.moveTo(cx - tickLen, yPos);
+        ctx.lineTo(cx + tickLen, yPos);
+        ctx.stroke();
+      }
+
+      // Eix Y (verd) - horitzontal
       ctx.strokeStyle = 'green';
       ctx.beginPath();
       ctx.moveTo(0, cy);
       ctx.lineTo(W, cy);
       ctx.stroke();
 
-      // Ticks
-      ctx.lineWidth = 1;
-
-      // X ticks
-      ctx.strokeStyle = 'red';
-      const maxXTicks = Math.floor((H / 2) / tickPx);
-      for (let i = 1; i <= maxXTicks; i++) {
-        let yUp = cy - i * tickPx;
-        let yDn = cy + i * tickPx;
-        ctx.beginPath(); ctx.moveTo(cx - tickLen, yUp); ctx.lineTo(cx + tickLen, yUp); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(cx - tickLen, yDn); ctx.lineTo(cx + tickLen, yDn); ctx.stroke();
-      }
-
-      // Y ticks
-      ctx.strokeStyle = 'green';
+      // Tics sobre eix Y
       const maxYTicks = Math.floor((W / 2) / tickPx);
       for (let i = 1; i <= maxYTicks; i++) {
-        let xR = cx + i * tickPx;
-        let xL = cx - i * tickPx;
-        ctx.beginPath(); ctx.moveTo(xR, cy - tickLen); ctx.lineTo(xR, cy + tickLen); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(xL, cy - tickLen); ctx.lineTo(xL, cy + tickLen); ctx.stroke();
+        // +Y (dreta)
+        let xPos = cx + i * tickPx;
+        ctx.beginPath();
+        ctx.moveTo(xPos, cy - tickLen);
+        ctx.lineTo(xPos, cy + tickLen);
+        ctx.stroke();
+
+        // -Y (esquerra)
+        xPos = cx - i * tickPx;
+        ctx.beginPath();
+        ctx.moveTo(xPos, cy - tickLen);
+        ctx.lineTo(xPos, cy + tickLen);
+        ctx.stroke();
       }
 
       ctx.restore();
     }
 
-    // ===== ROS connect =====
-    function connectToROS() {
-      if (ros && ros.isConnected) return;
-
-      const btn = document.getElementById('connectBtn');
-      btn.setAttribute('disabled', 'disabled');
-
-      const robotNum = parseInt(document.getElementById('robotNumber').value) || 1;
-      const host = window.location.hostname;
-      const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
-
-      let rosbridgeAddress;
-      if (host.startsWith("192.168.1.")) {
-        const lastOctet = robotNum * 10 + 4;
-        rosbridgeAddress = `${scheme}://192.168.1.${lastOctet}:9090`;
-      } else {
-        rosbridgeAddress = getRosbridgeAddress();
-      }
-
-      console.log("Connecting to:", rosbridgeAddress);
-
-      resizeMapCanvas();
-
-      ros = new ROSLIB.Ros({ url: rosbridgeAddress });
-
-      ros.on('connection', () => {
-        console.log('Connected');
-        btn.classList.add('connected');
-        btn.removeAttribute('disabled');
-        ros.isConnected = true;
-        setupTopics();
-        setupControls();
-      });
-
-      ros.on('error', (e) => {
-        console.error('ROS Error', e);
-        btn.classList.remove('connected');
-        btn.removeAttribute('disabled');
-        ros.isConnected = false;
-      });
-
-      ros.on('close', () => {
-        console.log('ROS Closed');
-        btn.classList.remove('connected');
-        btn.removeAttribute('disabled');
-        ros.isConnected = false;
-      });
-    }
-
-    // ===== Topics =====
-    function setupTopics() {
-      // cmd_vel
-      cmdVelTopic = new ROSLIB.Topic({
-        ros,
-        name: '/cmd_vel',
-        messageType: 'geometry_msgs/msg/Twist'
-      });
-
-      // Camera
-      const imageTopic = new ROSLIB.Topic({
-        ros,
-        name: '/image_raw/compressed',
-        messageType: 'sensor_msgs/msg/CompressedImage'
-      });
-      imageTopic.subscribe(msg => {
-        document.getElementById('camera-feed').src =
-          "data:image/jpeg;base64," + msg.data;
-      });
-
-      // Odom
-      const odomTopic = new ROSLIB.Topic({
-        ros,
-        name: '/odom',
-        messageType: 'nav_msgs/msg/Odometry'
-      });
-
-      odomTopic.subscribe(msg => {
-        const p = msg.pose.pose.position;
-        const o = msg.pose.pose.orientation;
-        const t = msg.twist.twist;
-
-        const yawAbs = quaternionToYaw(o);
-
-        // inicialització origen i orientació
-        if (!originSet) {
-          originX = p.x;
-          originY = p.y;
-          originSet = true;
-        }
-        if (!yaw0Set) {
-          yaw0 = yawAbs;
-          yaw0Set = true;
-        }
-
-        // vector relatiu en odom
-        const dx = p.x - originX;
-        const dy = p.y - originY;
-
-        // frame display:
-        // eX = forward inicial, eY = right inicial
-        const c0 = Math.cos(yaw0);
-        const s0 = Math.sin(yaw0);
-
-        // projecions
-        const Xd =  dx * c0 + dy * s0;          // along forward inicial
-        const Y_left = -dx * s0 + dy * c0;      // along left inicial
-        const Yd = -Y_left;                     // right positiva
-
-        lastRobotX = Xd;
-        lastRobotY = Yd;
-        lastRobotYaw = yawAbs - yaw0; // orientació en frame display
-
-        // velocitat body (x forward, y left)
-        const vx_b = t.linear.x;
-        const vy_b = t.linear.y;
-
-        // a frame display (global)
-        const cr = Math.cos(lastRobotYaw);
-        const sr = Math.sin(lastRobotYaw);
-
-        const vx_world = vx_b * cr - vy_b * sr;
-        const vy_left_world = vx_b * sr + vy_b * cr;
-        const vy_world = -vy_left_world;
-
-        // update text
-        document.getElementById('position-x').textContent = lastRobotX.toFixed(2);
-        document.getElementById('position-y').textContent = lastRobotY.toFixed(2);
-        document.getElementById('rotation-z').textContent =
-          (lastRobotYaw * 180 / Math.PI).toFixed(1);
-
-        drawRobotState(lastRobotX, lastRobotY, vx_world, vy_world, lastRobotYaw, latestScan);
-      });
-
-      // LiDAR
-      const scanTopic = new ROSLIB.Topic({
-        ros,
-        name: '/scan',
-        messageType: 'sensor_msgs/msg/LaserScan'
-      });
-      scanTopic.subscribe(msg => {
-        latestScan = msg;
-      });
-    }
-
-    // ===== Dibuix =====
-    function drawRobotState(robotX, robotY, velX, velY, yawRel, scanMsg) {
+    // Dibuixa mapa + eixos + robot + velocitat + LiDAR
+    function drawRobotState(robotX, robotY, velX, velY, yaw, scanMsg) {
       const canvas = document.getElementById('map-canvas');
       const ctx = canvas.getContext('2d');
+
       const W = canvas.clientWidth || canvas.width;
       const H = canvas.clientHeight || canvas.height;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Eixos
+      // Fons mapa (si hi és)
+      if (mapImage.complete && mapImage.naturalWidth > 0) {
+        ctx.drawImage(mapImage, 0, 0, W, H);
+      }
+
+      // Eixos al centre
       drawAxes(ctx, W, H);
 
-      // LiDAR en frame display
-      if (scanMsg && originSet && yaw0Set) {
+      // --- LiDAR ---
+      if (scanMsg) {
         const angleMin = scanMsg.angle_min;
         const angleInc = scanMsg.angle_increment;
         const rangeMin = scanMsg.range_min;
@@ -509,19 +496,21 @@
         const ranges = scanMsg.ranges || [];
 
         ctx.save();
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.9)'; // groc fort
 
         for (let i = 0; i < ranges.length; i++) {
           const r = ranges[i];
           if (!isFinite(r) || r < rangeMin || r > rangeMax) continue;
 
-          const a = angleMin + i * angleInc;
-          const globalAngle = yawRel + a;
+          const angle = angleMin + i * angleInc;
+          const globalAngle = yaw + angle;
 
+          // coords relatives al centre (ja centrat)
           const wx = robotX + r * Math.cos(globalAngle);
           const wy = robotY + r * Math.sin(globalAngle);
 
           const [px, py] = worldToPixel(wx, wy, W, H);
+
           if (px >= 0 && px <= W && py >= 0 && py <= H) {
             ctx.fillRect(px, py, 2, 2);
           }
@@ -530,72 +519,55 @@
         ctx.restore();
       }
 
-      // Robot rectangle
-      const [cx, cy] = worldToPixel(robotX, robotY, W, H);
-      const hx = ROBOT_LEN_M / 2;
-      const hy = ROBOT_WID_M / 2;
+      // --- Robot ---
+      const [robotPx, robotPy] = worldToPixel(robotX, robotY, W, H);
 
-      const corners = [
-        [ hx,  hy],
-        [ hx, -hy],
-        [-hx, -hy],
-        [-hx,  hy]
-      ];
-
-      ctx.save();
       ctx.beginPath();
-      for (let i = 0; i < corners.length; i++) {
-        const [xr, yr] = corners[i];
-        const xw = robotX + xr * Math.cos(yawRel) - yr * Math.sin(yawRel);
-        const yw = robotY + xr * Math.sin(yawRel) + yr * Math.cos(yawRel);
-        const [px, py] = worldToPixel(xw, yw, W, H);
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(0, 255, 0, 0.4)';
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 1.5;
+      ctx.arc(robotPx, robotPy, ROBOT_RADIUS, 0, Math.PI * 2);
+      ctx.fillStyle = 'green';
       ctx.fill();
+      ctx.strokeStyle = 'black';
       ctx.stroke();
-      ctx.restore();
 
-      // Fletxa orientació (forward, blau)
-      const arrowLen = 0.20;
-      const tipX = robotX + arrowLen * Math.cos(yawRel);
-      const tipY = robotY + arrowLen * Math.sin(yawRel);
-      const [ax, ay] = worldToPixel(tipX, tipY, W, H);
+      // Orientació (eix X forward)
+      const arrowLen = 0.15; // m
+      const arrowX = robotX + arrowLen * Math.cos(yaw);
+      const arrowY = robotY + arrowLen * Math.sin(yaw);
+      const [ax, ay] = worldToPixel(arrowX, arrowY, W, H);
 
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
+      ctx.moveTo(robotPx, robotPy);
       ctx.lineTo(ax, ay);
       ctx.lineWidth = 2;
       ctx.strokeStyle = 'blue';
       ctx.stroke();
 
-      // Vector velocitat (vermell)
+      // Vector velocitat global
       const speed = Math.hypot(velX, velY);
       if (speed > 0.01) {
-        const len_m = Math.min(speed * SPEED_VECTOR_GAIN, 0.5);
-        const vx = robotX + len_m * (velX / speed);
-        const vy = robotY + len_m * (velY / speed);
-        const [vx_px, vy_px] = worldToPixel(vx, vy, W, H);
+        const movementAngle = Math.atan2(velY, velX);
+        const vecLen_m = speed;           // 1 m/s → SPEED_VECTOR_SCALE px
+        const vecLen_px = vecLen_m * SPEED_VECTOR_SCALE / (1.0 / MAP_RESOLUTION);
+
+        const endX_m = robotX + (vecLen_px * MAP_RESOLUTION) * Math.cos(movementAngle);
+        const endY_m = robotY + (vecLen_px * MAP_RESOLUTION) * Math.sin(movementAngle);
+        const [endX, endY] = worldToPixel(endX_m, endY_m, W, H);
 
         ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(vx_px, vy_px);
+        ctx.moveTo(robotPx, robotPy);
+        ctx.lineTo(endX, endY);
         ctx.lineWidth = 2;
         ctx.strokeStyle = 'red';
         ctx.stroke();
 
-        const arrowAngle = Math.atan2(vy_px - cy, vx_px - cx);
+        // Fletxa
         ctx.save();
-        ctx.translate(vx_px, vy_px);
-        ctx.rotate(arrowAngle);
+        ctx.translate(endX, endY);
+        ctx.rotate(-movementAngle);
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(-8, 4);
-        ctx.lineTo(-8, -4);
+        ctx.lineTo(-10, 5);
+        ctx.lineTo(-10, -5);
         ctx.closePath();
         ctx.fillStyle = 'red';
         ctx.fill();
@@ -603,73 +575,68 @@
       }
     }
 
-    // ===== Controls =====
     function publishTwist() {
       const mag = Math.hypot(currentLinearX, currentLinearY);
-      let vx = currentLinearX;
-      let vy = currentLinearY;
       if (mag > maxSpeed && mag > 0) {
-        const s = maxSpeed / mag;
-        vx *= s; vy *= s;
+        const scale = maxSpeed / mag;
+        currentLinearX *= scale;
+        currentLinearY *= scale;
       }
 
-      if (!cmdVelTopic) return;
-      const msg = new ROSLIB.Message({
-        linear:  { x: vx, y: vy, z: 0 },
+      const twist = new ROSLIB.Message({
+        linear:  { x: currentLinearX, y: currentLinearY, z: 0 },
         angular: { x: 0, y: 0, z: currentAngularZ }
       });
-      cmdVelTopic.publish(msg);
+
+      if (cmdVelTopic) {
+        cmdVelTopic.publish(twist);
+      }
     }
 
     function setupControls() {
-      // Joystick
-      const joystick = nipplejs.create({
+      const options_h = {
         zone: document.getElementById('joystick_h'),
         mode: 'static',
         position: { left: '50%', top: '50%' },
         color: 'red',
         size: 150
-      });
+      };
+      const j = nipplejs.create(options_h);
 
-      const vxSpan = document.getElementById('vx');
-      const vySpan = document.getElementById('vy');
-      const omegaSlider = document.getElementById('omegaSlider');
-      const omegaVal = document.getElementById('omegaVal');
-
-      joystick.on('move', (evt, data) => {
+      j.on('move', function (evt, data) {
         const ratio = Math.min(data.distance / distanceFactor, 1.0);
-        const a = data.angle.radian;
-        // Up -> +X, Right -> -Y (right), Left -> +Y (left)
-        currentLinearX = Math.sin(a) * maxSpeed * ratio;
-        currentLinearY = -Math.cos(a) * maxSpeed * ratio;
-        vxSpan.textContent = currentLinearX.toFixed(2);
-        vySpan.textContent = currentLinearY.toFixed(2);
+        currentLinearX = Math.sin(data.angle.radian) * maxSpeed * ratio;
+        currentLinearY = -Math.cos(data.angle.radian) * maxSpeed * ratio;
+
+        document.getElementById('vx').textContent = currentLinearX.toFixed(2);
+        document.getElementById('vy').textContent = currentLinearY.toFixed(2);
       });
 
-      joystick.on('end', () => {
+      j.on('end', function () {
         currentLinearX = 0;
         currentLinearY = 0;
-        vxSpan.textContent = '0.00';
-        vySpan.textContent = '0.00';
+        document.getElementById('vx').textContent = '0.00';
+        document.getElementById('vy').textContent = '0.00';
       });
 
-      // Slider ω: esquerra (+), dreta (-)
-      omegaSlider.addEventListener('input', () => {
-        const v = parseFloat(omegaSlider.value) || 0;
-        currentAngularZ = -v * maxTurn; // min=-1 -> +maxTurn; max=+1 -> -maxTurn
-        omegaVal.textContent = currentAngularZ.toFixed(2);
-      });
+      const omegaSlider = document.getElementById('omegaSlider');
+      const omegaVal = document.getElementById('omegaVal');
+      if (omegaSlider) {
+        omegaSlider.addEventListener('input', () => {
+          currentAngularZ = parseFloat(omegaSlider.value) * maxTurn;
+          omegaVal.textContent = currentAngularZ.toFixed(2);
+        });
+      }
 
       setInterval(() => {
         publishTwist();
-        omegaVal.textContent = currentAngularZ.toFixed(2);
+        document.getElementById('omegaVal').textContent = currentAngularZ.toFixed(2);
       }, 50);
     }
 
-    // ===== Init =====
     window.addEventListener('resize', resizeMapCanvas);
+
     window.addEventListener('DOMContentLoaded', () => {
-      resizeMapCanvas();
       const robotInput = document.getElementById('robotNumber');
       robotInput.addEventListener('change', (e) => {
         let v = parseInt(e.target.value);
